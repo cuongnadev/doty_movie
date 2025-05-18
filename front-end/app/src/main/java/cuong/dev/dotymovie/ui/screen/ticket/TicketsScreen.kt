@@ -55,6 +55,7 @@ fun TicketsScreen(
                 )
             } else {
                 tickets.value.forEach { ticket ->
+                    Log.i("Status", ticket.status.value)
                     TicketItem(
                         ticketCounts = ticket.ticketCount,
                         selectedSeats = ticket.selectedSeats,

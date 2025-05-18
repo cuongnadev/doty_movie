@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
-import { IsArray, IsBoolean, IsInt, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsBoolean, IsEnum, IsInt, IsString, ValidateNested } from "class-validator";
 import { TicketCountDto } from "./create-ticket.dto";
+import { TicketStatus } from "../entities/ticket.entity";
 
 export class ResponseTicketDto {
     @IsInt()
@@ -27,6 +28,9 @@ export class ResponseTicketDto {
 
     @IsInt()
     amount: number;
+
+    @IsEnum(TicketStatus)
+    status: TicketStatus;
 
     @IsBoolean()
     isUsed: boolean;

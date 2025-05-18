@@ -175,6 +175,8 @@ export class TicketService {
 
       if (!showtime) continue;
 
+      console.log("status: " + ticket.status)
+
       responses.push({
         id: ticket.id,
         ticketCount: {
@@ -189,6 +191,7 @@ export class TicketService {
         amount: ticket.amount,
         isUsed: ticket.isUsed,
         ticketCode: ticket.ticketCode,
+        status: ticket.status
       });
     }
 
