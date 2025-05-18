@@ -12,9 +12,20 @@ export class TicketController {
     return this.ticketService.create(createTicketDto);
   }
 
+  @Post("payment/webhook")
+  async handlePaymentWebhook(@Body() payload: any) {
+     console.log("Received webhook:", payload);
+    return this.ticketService.handlePaymentWebhook(payload);
+  }
+
   @Get("my-ticket")
   findTicketsByUser(@Query("userId") userId: number) {
     return this.ticketService.findTicketsByUser(userId);
+  }
+
+  @Get('status/:ticketCode')
+  getStatus(@Param('ticketCode') ticketCode: string) {
+    return this.ticketService.getStatus(ticketCode);
   }
 
   @Get()
@@ -32,8 +43,13 @@ export class TicketController {
     return this.ticketService.update(+id, updateTicketDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ticketService.remove(+id);
+  @Patch('cancel/:ticketCode')
+  cancelTicket(@Param('ticketCode') ticketCode: string) {
+    return this.ticketService.cancelTicket(ticketCode);
+  }
+
+  @Delete('delete/:ticketCode')
+  remove(@Param('ticketCode') ticketCode: string) {
+    return this.ticketService.remove(ticketCode);
   }
 }

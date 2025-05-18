@@ -29,5 +29,8 @@ export class ResponseTicketDto {
     amount: number;
 
     @IsBoolean()
-    isUsed: boolean
+    isUsed: boolean;
+
+    @IsString()
+    ticketCode: string;
 }

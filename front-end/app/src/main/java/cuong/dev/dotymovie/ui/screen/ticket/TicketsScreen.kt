@@ -1,6 +1,7 @@
 package cuong.dev.dotymovie.ui.screen.ticket
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -44,7 +45,8 @@ fun TicketsScreen(
     HomeLayout(navController, viewModel) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (tickets.value.isEmpty()) {
                 Text(
@@ -61,7 +63,7 @@ fun TicketsScreen(
                         startTime = ticket.startTime,
                         endTime = ticket.endTime,
                         amount = ticket.amount,
-                        isPaid = true
+                        status = ticket.status
                     )
                 }
             }

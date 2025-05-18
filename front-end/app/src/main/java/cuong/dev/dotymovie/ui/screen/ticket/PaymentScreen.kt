@@ -9,10 +9,14 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,8 +34,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import cuong.dev.dotymovie.R
+import cuong.dev.dotymovie.constants.TicketStatus
 import cuong.dev.dotymovie.constants.TypeStep
-import cuong.dev.dotymovie.model.ticket.TicketRequest
+import cuong.dev.dotymovie.model.ticket.CreateTicketRequest
 import cuong.dev.dotymovie.ui.component.ButtonType
 import cuong.dev.dotymovie.ui.component.CustomButton
 import cuong.dev.dotymovie.ui.component.StepperIndicator
@@ -39,26 +44,28 @@ import cuong.dev.dotymovie.ui.theme.AppTheme
 import cuong.dev.dotymovie.utils.decodeJWT
 import cuong.dev.dotymovie.viewmodel.AuthViewModel
 import cuong.dev.dotymovie.viewmodel.MovieViewModel
-import cuong.dev.dotymovie.viewmodel.PaymentViewModel
 import cuong.dev.dotymovie.viewmodel.ShowtimeViewModel
-import cuong.dev.dotymovie.viewmodel.TheaterViewModel
 import cuong.dev.dotymovie.viewmodel.TicketViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
 fun PaymentScreen(
     navController: NavController,
-    paymentViewModel: PaymentViewModel,
     authViewModel: AuthViewModel,
-    movieViewModel: MovieViewModel,
     showtimeViewModel: ShowtimeViewModel,
     ticketViewModel: TicketViewModel
 ) {
     val countdown = remember { mutableStateOf(300) }
     val isCanceled = remember { mutableStateOf(false) }
-    val qrCodeUrl = remember { mutableStateOf<String?>(null) }
+
+    val ticket = ticketViewModel.ticket.value
+    val ticketCode = ticket?.ticketCode
+    val qrCodeUrl = ticket?.urlQR
+
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         val token = authViewModel.getToken()
@@ -74,7 +81,7 @@ fun PaymentScreen(
         val seatNumbers = ticketViewModel.seatNumbers.value
         val ticketCounts = ticketViewModel.ticketCounts.value
 
-        val ticketData = TicketRequest(
+        val ticketData = CreateTicketRequest(
             userId = userId,
             ticketCount = ticketCounts,
             showtimeId = showtimeId,
@@ -82,7 +89,7 @@ fun PaymentScreen(
             amount = ticketViewModel.totalAmount.value
         )
 
-        paymentViewModel.setTicketData(ticketData)
+        ticketViewModel.saveTicket(ticketData)
     }
 
     LaunchedEffect(Unit) {
@@ -92,22 +99,32 @@ fun PaymentScreen(
         }
         if (countdown.value == 0 && !isCanceled.value) {
             isCanceled.value = true
-            ticketViewModel.clearSeats()
+
+            ticketCode?.let {
+                withContext(Dispatchers.IO) {
+                    ticketViewModel.cancelTicket(it)
+                }
+            }
+
             withContext(Dispatchers.Main) {
                 navController.popBackStack()
             }
         }
     }
 
-    fun generateQRCodeUrl(): String {
-        val bankId = "970418"
-        val accountNo = "6263742940"
-        val usdAmount = ticketViewModel.totalAmount.value
-        val vndAmount = (usdAmount * 24000)
-        val movie = movieViewModel.movie.value!!.title
-        val accountName = "Nguyen Anh Cuong"
+    val ticketStatus by ticketViewModel.ticketStatus.collectAsState()
+    LaunchedEffect(ticketCode) {
+        while (true) {
+            ticketCode?.let {
+                ticketViewModel.getStatusTicket(it)
+            }
 
-        return "https://img.vietqr.io/image/$bankId-$accountNo-compact2.jpg?amount=$vndAmount&addInfo=Payment for movie $movie&accountName=$accountName"
+            if (ticketStatus == TicketStatus.PAID) {
+                navController.navigate("payment-confirm")
+                break
+            }
+            delay(5000)
+        }
     }
 
     Column(
@@ -118,8 +135,6 @@ fun PaymentScreen(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         StepperIndicator(navController, TypeStep.PAYMENT_METHOD.value)
-
-        qrCodeUrl.value = generateQRCodeUrl()
 
         Column(
             modifier = Modifier
@@ -136,7 +151,8 @@ fun PaymentScreen(
             )
 
             val color = AppTheme.colors.whiteColor
-            qrCodeUrl.value?.let {
+
+            if (qrCodeUrl != null) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -155,7 +171,7 @@ fun PaymentScreen(
                         }
                 ) {
                     AsyncImage(
-                        model = it,
+                        model = qrCodeUrl,
                         contentDescription = "QR Code",
                         modifier = Modifier
                             .fillMaxWidth()
@@ -163,11 +179,21 @@ fun PaymentScreen(
                             .aspectRatio(1f)
                     )
                 }
-            } ?: Text(
-                "Loading QR...",
-                color = AppTheme.colors.whiteColor.copy(0.8f),
-                style = AppTheme.typography.titleSmall
-            )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = AppTheme.colors.primary,
+                        strokeWidth = 4.dp,
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+            }
+
 
             Text(
                 text = "Time left: ${countdown.value / 60}:${String.format("%02d", countdown.value % 60)}",
@@ -238,7 +264,11 @@ fun PaymentScreen(
                     type = ButtonType.FILLED,
                     onClick = {
                         isCanceled.value = true
-                        ticketViewModel.clearSeats()
+                        ticketCode?.let {
+                            scope.launch {
+                                ticketViewModel.cancelTicket(it)
+                            }
+                        }
                         navController.popBackStack()
                     },
                     isTextCentered = true,

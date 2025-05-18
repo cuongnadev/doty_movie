@@ -2,11 +2,12 @@ package cuong.dev.dotymovie.ui.screen.ticket
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,11 +33,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import cuong.dev.dotymovie.R
 import cuong.dev.dotymovie.constants.TypeStep
-import cuong.dev.dotymovie.data.local.MovieData
 import cuong.dev.dotymovie.model.movie.Movie
 import cuong.dev.dotymovie.model.showtime.Showtime
 import cuong.dev.dotymovie.model.theater.Theater
@@ -60,7 +62,7 @@ fun BuyTicketScreen(
 ) {
     var selectedTheater by remember { mutableStateOf<Theater?>(null) }
     var selectedSession by remember { mutableStateOf<Showtime?>(null) }
-    var selectedBuffet by remember { mutableStateOf<String?>(null) }
+    val limitSeats by ticketViewModel.limitSeats
 
     LaunchedEffect(selectedTheater) {
         theaterViewModel.fetchAllTheaters()
@@ -93,17 +95,14 @@ fun BuyTicketScreen(
 
                 IntroductionText()
 
-                Spacer(Modifier.height(2.dp))
-
                 MovieOptions(
                     selectedTheater,
                     onTheaterSelected = { selectedTheater = it },
                     selectedSession,
                     onSessionSelected = { selectedSession = it },
-                    selectedBuffet,
-                    onBuffetSelected = { selectedBuffet = it },
                     theaterViewModel,
-                    showtimeViewModel
+                    showtimeViewModel,
+                    ticketViewModel
                 )
             }
 
@@ -125,7 +124,7 @@ fun BuyTicketScreen(
                         iconSize = 16.dp,
                         textColor = AppTheme.colors.whiteColor,
                         modifier = Modifier.padding(20.dp),
-                        disable = (selectedTheater == null || selectedSession == null)
+                        disable = (selectedTheater == null || selectedSession == null || limitSeats == 0)
                     )
                 }
             }
@@ -261,10 +260,9 @@ private fun MovieOptions(
     onTheaterSelected: (Theater) -> Unit,
     selectedSession: Showtime?,
     onSessionSelected: (Showtime?) -> Unit,
-    selectedBuffet: String?,
-    onBuffetSelected: (String) -> Unit,
     theaterViewModel: TheaterViewModel,
-    showtimeViewModel: ShowtimeViewModel
+    showtimeViewModel: ShowtimeViewModel,
+    ticketViewModel: TicketViewModel
 ) {
     val theaters by theaterViewModel.theaters.collectAsState(initial = emptyList())
     val showtimes by showtimeViewModel.showtimes.collectAsState(initial = emptyList())
@@ -300,13 +298,167 @@ private fun MovieOptions(
             disable = selectedTheater == null
         )
 
-        CustomDropdown(
-            label = "Buffet Products",
-            items = MovieData.buffetProducts,
-            selectedItem = selectedBuffet,
-            itemToText = { it },
-            onItemSelected = onBuffetSelected,
-            disable = selectedTheater == null
+        TicketCountOption(ticketViewModel)
+    }
+}
+
+@Composable
+private fun TicketCountOption (
+    ticketViewModel: TicketViewModel
+) {
+    val ticketCounts by ticketViewModel.ticketCounts.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text(
+            "Please select the number of seats you would like to book:",
+            color = AppTheme.colors.whiteColor,
+            style = AppTheme.typography.titleSmall,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    AppTheme.colors.deepBlack.copy(0.8f),
+                    shape = RoundedCornerShape(14.dp)
+                )
+                .border(
+                    2.dp,
+                    AppTheme.colors.whiteColor,
+                    shape = RoundedCornerShape(14.dp)
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth(0.44f)
+                    .padding(8.dp)
+            ) {
+                CustomButton(
+                    onClick = {
+                        ticketViewModel.updateAdult(ticketCounts.adult + 1)
+                    },
+                    contentPadding = PaddingValues(0.dp),
+                    type = ButtonType.ICON,
+                    iconPainter = painterResource(R.drawable.plus),
+                    textColor = AppTheme.colors.whiteColor
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = ticketCounts.adult.toString(),
+                        color = if(ticketCounts.adult < 1) AppTheme.colors.whiteColor.copy(0.4f)
+                        else AppTheme.colors.whiteColor,
+                        style = AppTheme.typography.bodyMedium.copy(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.W600
+                        )
+                    )
+
+                    Text(
+                        "ADULT",
+                        color = if(ticketCounts.adult < 1) AppTheme.colors.whiteColor.copy(0.4f)
+                        else AppTheme.colors.whiteColor,
+                        style = AppTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.W500
+                        )
+                    )
+                }
+
+                CustomButton(
+                    onClick = {
+                        ticketViewModel.updateAdult(ticketCounts.adult - 1)
+                    },
+                    contentPadding = PaddingValues(0.dp),
+                    type = ButtonType.ICON,
+                    iconPainter = painterResource(R.drawable.subtract),
+                    textColor = AppTheme.colors.whiteColor,
+                    disable = ticketCounts.adult == 0
+                )
+            }
+
+            HorizontalDivider(
+                modifier = Modifier
+                    .width(2.dp)
+                    .height(60.dp)
+                    .background(AppTheme.colors.whiteColor.copy(0.6f)),
+                thickness = 2.dp
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth(0.84f)
+                    .padding(8.dp)
+            ) {
+                CustomButton(
+                    onClick = {
+                        ticketViewModel.updateChild(ticketCounts.child + 1)
+                    },
+                    contentPadding = PaddingValues(0.dp),
+                    type = ButtonType.ICON,
+                    iconPainter = painterResource(R.drawable.plus),
+                    textColor = AppTheme.colors.whiteColor
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text(
+                        text = ticketCounts.child.toString(),
+                        color = if(ticketCounts.child < 1) AppTheme.colors.whiteColor.copy(0.4f)
+                        else AppTheme.colors.whiteColor,
+                        style = AppTheme.typography.bodyMedium.copy(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.W600
+                        )
+                    )
+
+                    Text(
+                        "CHILD",
+                        color = if(ticketCounts.child < 1) AppTheme.colors.whiteColor.copy(0.4f)
+                        else AppTheme.colors.whiteColor,
+                        style = AppTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.W500
+                        )
+                    )
+                }
+
+                CustomButton(
+                    onClick = {
+                        ticketViewModel.updateChild(ticketCounts.child - 1)
+                    },
+                    contentPadding = PaddingValues(0.dp),
+                    type = ButtonType.ICON,
+                    iconPainter = painterResource(R.drawable.subtract),
+                    textColor = AppTheme.colors.whiteColor,
+                    disable = ticketCounts.child == 0
+                )
+            }
+        }
+
+        Text("Ticket Terms:\n" +
+                "- There are two types of movie tickets: Adult and Child.\n" +
+                "- Adult tickets cost \$10 each.\n" +
+                "- Child tickets cost \$8 each.",
+            color = AppTheme.colors.orangeColor,
+            style = AppTheme.typography.titleSmall,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }

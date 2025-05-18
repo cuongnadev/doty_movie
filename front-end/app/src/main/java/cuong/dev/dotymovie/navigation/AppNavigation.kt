@@ -17,6 +17,7 @@ import cuong.dev.dotymovie.ui.screen.auth.SignUpScreen
 import cuong.dev.dotymovie.ui.screen.auth.VerificationEmailScreen
 import cuong.dev.dotymovie.ui.screen.movie.FavoritesScreen
 import cuong.dev.dotymovie.ui.screen.movie.MovieDetailsScreen
+import cuong.dev.dotymovie.ui.screen.movie.SearchScreen
 import cuong.dev.dotymovie.ui.screen.ticket.BuyTicketScreen
 import cuong.dev.dotymovie.ui.screen.ticket.MyTicketScreen
 import cuong.dev.dotymovie.ui.screen.ticket.PaymentConfirmScreen
@@ -26,7 +27,6 @@ import cuong.dev.dotymovie.ui.screen.ticket.TicketsScreen
 import cuong.dev.dotymovie.viewmodel.AuthViewModel
 import cuong.dev.dotymovie.viewmodel.MovieViewModel
 import cuong.dev.dotymovie.viewmodel.NavigationViewModel
-import cuong.dev.dotymovie.viewmodel.PaymentViewModel
 import cuong.dev.dotymovie.viewmodel.SeatViewModel
 import cuong.dev.dotymovie.viewmodel.ShowtimeViewModel
 import cuong.dev.dotymovie.viewmodel.TheaterViewModel
@@ -36,7 +36,6 @@ import cuong.dev.dotymovie.viewmodel.TicketViewModel
 fun AppNavigation() {
     val navController = rememberNavController()
     val viewModel: NavigationViewModel = viewModel()
-    val paymentViewModel: PaymentViewModel = hiltViewModel()
     val authViewModel: AuthViewModel = hiltViewModel()
     val movieViewModel: MovieViewModel = hiltViewModel()
     val theaterViewModel: TheaterViewModel = hiltViewModel()
@@ -109,6 +108,15 @@ fun AppNavigation() {
         }
 
         composable(
+            route = "search-movies",
+        ) {
+            SearchScreen(
+                navController,
+                movieViewModel
+            )
+        }
+
+        composable(
             route = "movie-details/{movieId}"
         ) { navBackStackEntry ->
             val  movieId = navBackStackEntry.arguments?.getString("movieId")
@@ -150,9 +158,7 @@ fun AppNavigation() {
         ) {
             PaymentScreen(
                 navController,
-                paymentViewModel,
                 authViewModel,
-                movieViewModel,
                 showtimeViewModel,
                 ticketViewModel
             )
@@ -161,7 +167,7 @@ fun AppNavigation() {
         composable(
             route = "payment-confirm"
         ) {
-            PaymentConfirmScreen(navController, paymentViewModel)
+            PaymentConfirmScreen(navController)
         }
 
         composable(

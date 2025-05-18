@@ -13,14 +13,19 @@ enum class TypeMovieItem {
     HORIZONTAL, VERTICAL
 }
 
-enum class PaymentStatus {
-    SUCCESSFUL, FAILED
-}
+enum class TicketStatus(val value: String) {
+    PENDING("pending"),
+    CONFIRMED("confirmed"),
+    CANCELLED("cancelled"),
+    PAID("paid");
 
-enum class MovieStatus(val status: String) {
-    HIGHLIGHT("highlight"),
-    NOW_SHOWING("now_showing"),
-    COMING_SOON("coming_soon")
+    override fun toString(): String = value
+
+    companion object {
+        fun fromValue(value: String): TicketStatus? {
+            return values().find { it.value == value }
+        }
+    }
 }
 
 enum class SeatStatus(val status: String) {

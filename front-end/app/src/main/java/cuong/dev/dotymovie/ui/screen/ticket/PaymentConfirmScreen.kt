@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -28,23 +26,17 @@ import cuong.dev.dotymovie.ui.component.ButtonType
 import cuong.dev.dotymovie.ui.component.CustomButton
 import cuong.dev.dotymovie.ui.component.StepperIndicator
 import cuong.dev.dotymovie.ui.theme.AppTheme
-import cuong.dev.dotymovie.viewmodel.PaymentViewModel
 
 @Composable
 fun PaymentConfirmScreen(
-    navController: NavController,
-    paymentViewModel: PaymentViewModel
+    navController: NavController
 ) {
-    val paymentSuccess by paymentViewModel.paymentSuccess.collectAsState()
-    val background = if(paymentSuccess!!) R.drawable.payment_successful_bg else R.drawable.bg_primary
-    val icon = if(paymentSuccess!!) R.drawable.payment_successful else R.drawable.payment_failed
-    val paymentStatus = if(paymentSuccess!!) "Payment SuccessFul" else "Payment Failed"
+    val background = R.drawable.payment_successful_bg
+    val icon = R.drawable.payment_successful
+    val paymentStatus = "Payment SuccessFul"
     val paymentDescription =
-        if(paymentSuccess!!)
             "We have sent a copy of your ticket to your e-mail address. " +
             "You can check your ticket in the My Tickets section on the homepage."
-        else "Your ticket purchase could not be processed because there was a problem with the payment process. " +
-             "Try to buy a ticket again by pressing the try again button."
 
     Image(
         painter = painterResource(background),
@@ -108,13 +100,10 @@ fun PaymentConfirmScreen(
         ) {
             CustomButton(
                 onClick = {
-                    if(paymentSuccess!!)
-                        navController.navigate("my-ticket")
-                    else
-                        navController.navigateUp()
+                    navController.navigate("my-ticket")
                 },
                 type = ButtonType.FILLED,
-                text = if(paymentSuccess!!) "View Ticket" else "Try Again",
+                text = "View Ticket",
                 modifier = Modifier
                     .fillMaxWidth()
             )

@@ -106,7 +106,7 @@ fun HomeLayout(
                         .size(40.dp)
                 ) {
                     IconButton(
-                        onClick = { Toast.makeText(context, "No notifications!!!", Toast.LENGTH_SHORT).show() },
+                        onClick = { navController.navigate("search-movies") },
                         modifier = Modifier
                             .size(40.dp)
                             .border(
@@ -116,21 +116,12 @@ fun HomeLayout(
                             .align(Alignment.Center)
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Notifications,
+                            painter = painterResource(id = R.drawable.icon_search),
                             contentDescription = "notification",
                             tint = AppTheme.colors.primary,
-                            modifier = Modifier.size(26.dp)
+                            modifier = Modifier.size(28.dp)
                         )
                     }
-
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(AppTheme.colors.whiteColor)
-                            .align(Alignment.TopEnd)
-                            .offset(x = (4).dp, y = (-4).dp)
-                    )
                 }
             }
 

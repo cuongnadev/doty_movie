@@ -4,9 +4,10 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import cuong.dev.dotymovie.model.movie.Movie
-import cuong.dev.dotymovie.model.movie.MovieFavorite
 import cuong.dev.dotymovie.model.movie.MovieFavoriteDTO
 import cuong.dev.dotymovie.model.movie.UpdateMovieDTO
 import cuong.dev.dotymovie.repository.MovieFavoriteRepository
@@ -15,7 +16,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import retrofit2.http.Body
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,7 +39,12 @@ class MovieViewModel @Inject constructor(
     private val _comingSoonMovies = MutableStateFlow<List<Movie>>(emptyList())
     val comingSoonMovies: Flow<List<Movie>> = _comingSoonMovies.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
     suspend fun fetchMovieHighLights() {
+        _isLoading.value = true
+
         try {
             val response = movieRepository.getMovieHighLights()
 
@@ -55,10 +61,14 @@ class MovieViewModel @Inject constructor(
         } catch (e: Exception) {
             _movieHighlights.value = emptyList()
             Log.e("MovieViewModel", "Exception during fetching movie highlights", e)
+        } finally {
+            _isLoading.value = false
         }
     }
 
     suspend fun fetchNewMovies() {
+        _isLoading.value = true
+
         try {
             val response = movieRepository.getNewMovies()
 
@@ -75,10 +85,14 @@ class MovieViewModel @Inject constructor(
         } catch (e: Exception) {
             _newMovies.value = emptyList()
             Log.e("MovieViewModel", "Exception during fetching new movies", e)
+        } finally {
+            _isLoading.value = false
         }
     }
 
     suspend fun fetchComingSoonMovies() {
+        _isLoading.value = true
+
         try {
             val response = movieRepository.getComingSoonMovies()
 
@@ -95,6 +109,8 @@ class MovieViewModel @Inject constructor(
         } catch (e: Exception) {
             _comingSoonMovies.value = emptyList()
             Log.e("MovieViewModel", "Exception during fetching coming soon movies", e)
+        } finally {
+            _isLoading.value = false
         }
     }
 
@@ -114,6 +130,7 @@ class MovieViewModel @Inject constructor(
     }
 
     suspend fun fetchMovieFavorite(userId: Int) {
+        _isLoading.value = true
         try {
             val response = movieFavoriteRepository.getMovieFavorites(userId)
 
@@ -131,6 +148,8 @@ class MovieViewModel @Inject constructor(
             }
         } catch (e: Exception) {
             Log.e("MovieViewModel", "Exception during fetching movie favorite", e)
+        } finally {
+            _isLoading.value = false
         }
     }
 
@@ -172,6 +191,25 @@ class MovieViewModel @Inject constructor(
             }
         } catch (e: Exception) {
             Log.e("MovieViewModel", "Exception during set favorite movie", e)
+        }
+    }
+
+    suspend fun searchMovie(query: String) {
+        _isLoading.value = true
+        _movies.emit(emptyList())
+
+        try {
+            val response = movieRepository.searchMovies(query)
+
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    _movies.emit(it)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("MovieViewModel", "Exception during search movie with q={$query}", e)
+        } finally {
+            _isLoading.value = false
         }
     }
 }

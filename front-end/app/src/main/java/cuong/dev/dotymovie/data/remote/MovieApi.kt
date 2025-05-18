@@ -7,6 +7,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface MovieApi {
     @GET("movie/high-light")
@@ -26,4 +27,7 @@ interface MovieApi {
 
     @PATCH("movie/{id}")
     suspend fun update(@Path("id") id: Int, @Body updateData: UpdateMovieDTO): Response<Unit>
+
+    @GET("movie/search")
+    suspend fun search(@Query("q") query: String): Response<List<Movie>>
 }

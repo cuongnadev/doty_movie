@@ -4,6 +4,7 @@ import cuong.dev.dotymovie.data.remote.MovieApi
 import cuong.dev.dotymovie.model.movie.Movie
 import cuong.dev.dotymovie.model.movie.UpdateMovieDTO
 import retrofit2.Response
+import retrofit2.http.Query
 import javax.inject.Inject
 
 class MovieRepository @Inject constructor(
@@ -31,5 +32,9 @@ class MovieRepository @Inject constructor(
 
     suspend fun update(movieId: Int, updateData: UpdateMovieDTO): Response<Unit> {
         return movieApi.update(movieId, updateData)
+    }
+
+    suspend fun searchMovies(query: String): Response<List<Movie>> {
+        return movieApi.search(query)
     }
 }

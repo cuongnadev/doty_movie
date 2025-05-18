@@ -90,4 +90,13 @@ export class MovieService {
   remove(id: number) {
     return `This action removes a #${id} movie`;
   }
+
+  search(query: string) {
+    return this.movieRepo.find({
+      where: {
+        title: ILike(`%${query}%`)
+      },
+      relations: ["medias"]
+    });
+  }
 }

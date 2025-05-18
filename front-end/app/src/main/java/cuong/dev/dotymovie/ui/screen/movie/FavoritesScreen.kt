@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +33,7 @@ fun FavoritesScreen(
     authViewModel: AuthViewModel
 ) {
     val movies by movieViewModel.movies.collectAsState(initial = emptyList())
+    val isLoading by movieViewModel.isLoading.collectAsState()
 
     LaunchedEffect(Unit) {
         val token = authViewModel.getToken()
@@ -51,27 +54,39 @@ fun FavoritesScreen(
                 .fillMaxSize()
                 .padding(start = 16.dp, end = 16.dp, bottom = 100.dp)
         ) {
-            if (movies.isNotEmpty()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    movies.forEach { movie ->
-                        MovieItem(
-                            movie = movie,
-                            type = TypeMovieItem.HORIZONTAL,
-                            navController = navController,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        )
+            when {
+                isLoading -> {
+                    CircularProgressIndicator(
+                        color = AppTheme.colors.primary,
+                        strokeWidth = 4.dp,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+
+                movies.isNotEmpty() -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        movies.forEach { movie ->
+                            MovieItem(
+                                movie = movie,
+                                type = TypeMovieItem.HORIZONTAL,
+                                navController = navController,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                        }
                     }
                 }
-            } else {
-                Text(
-                    "No favorite movies.",
-                    color = AppTheme.colors.whiteColor
-                )
+
+                else -> {
+                    Text(
+                        "No favorite movies.",
+                        color = AppTheme.colors.whiteColor
+                    )
+                }
             }
         }
     }

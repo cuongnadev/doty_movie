@@ -2,19 +2,23 @@ package cuong.dev.dotymovie.ui.screen
 
 import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
@@ -41,6 +45,7 @@ fun HomeScreen(
     val movieHighlights by movieViewModel.movieHighlights.collectAsState(initial = emptyList())
     val newMovies by movieViewModel.newMovies.collectAsState(initial = emptyList())
     val comingSoonMovies by movieViewModel.comingSoonMovies.collectAsState(initial = emptyList())
+    val isLoading by movieViewModel.isLoading.collectAsState()
 
     val view = LocalView.current
     if(!view.isInEditMode) {
@@ -67,18 +72,32 @@ fun HomeScreen(
             MovieSection(
                 title = "HighLights"
             ) {
-                if(movieHighlights.isNotEmpty()) {
-                    MovieCarousel(
-                        listMovie = movieHighlights,
-                        typeMovie = TypeMovieItem.HORIZONTAL,
-                        indicator = true,
-                        navController
-                    )
-                } else {
-                    Text(
-                        "Loading data movie highlights...",
-                        color = AppTheme.colors.whiteColor
-                    )
+                when {
+                    isLoading -> {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(
+                                color = AppTheme.colors.primary,
+                                strokeWidth = 4.dp,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
+                    }
+
+                    movieHighlights.isNotEmpty() -> {
+                        MovieCarousel(
+                            listMovie = movieHighlights,
+                            typeMovie = TypeMovieItem.HORIZONTAL,
+                            indicator = true,
+                            navController
+                        )
+                    }
+
+                    else -> {
+                        Text(
+                            "No data movie highlights",
+                            color = AppTheme.colors.whiteColor
+                        )
+                    }
                 }
             }
 
@@ -87,27 +106,41 @@ fun HomeScreen(
             MovieSection(
                 title = "New Movies In Theaters"
             ) {
-                if(newMovies.isNotEmpty()) {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 26.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(newMovies.size) { index ->
-                            MovieItem(
-                                modifier = Modifier.width(160.dp),
-                                movie = newMovies[index],
-                                type = TypeMovieItem.VERTICAL,
-                                navController
+                when {
+                    isLoading -> {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(
+                                color = AppTheme.colors.primary,
+                                strokeWidth = 4.dp,
+                                modifier = Modifier.size(40.dp)
                             )
                         }
                     }
-                } else {
-                    Text(
-                        "Loading data new movies...",
-                        color = AppTheme.colors.whiteColor
-                    )
+
+                    newMovies.isNotEmpty() -> {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 26.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(newMovies.size) { index ->
+                                MovieItem(
+                                    modifier = Modifier.width(160.dp),
+                                    movie = newMovies[index],
+                                    type = TypeMovieItem.VERTICAL,
+                                    navController
+                                )
+                            }
+                        }
+                    }
+
+                    else -> {
+                        Text(
+                            "No data new movies",
+                            color = AppTheme.colors.whiteColor
+                        )
+                    }
                 }
             }
 
@@ -116,27 +149,41 @@ fun HomeScreen(
             MovieSection(
                 title = "Coming Soon"
             ) {
-                if (comingSoonMovies.isNotEmpty()) {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 26.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(comingSoonMovies.size) { index ->
-                            MovieItem(
-                                modifier = Modifier.width(160.dp),
-                                movie = comingSoonMovies[index],
-                                type = TypeMovieItem.VERTICAL,
-                                navController
+                when {
+                    isLoading -> {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(
+                                color = AppTheme.colors.primary,
+                                strokeWidth = 4.dp,
+                                modifier = Modifier.size(40.dp)
                             )
                         }
                     }
-                } else {
-                    Text(
-                        "Loading data coming soon movies...",
-                        color = AppTheme.colors.whiteColor
-                    )
+
+                    comingSoonMovies.isNotEmpty() -> {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 26.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(comingSoonMovies.size) { index ->
+                                MovieItem(
+                                    modifier = Modifier.width(160.dp),
+                                    movie = comingSoonMovies[index],
+                                    type = TypeMovieItem.VERTICAL,
+                                    navController
+                                )
+                            }
+                        }
+                    }
+
+                    else -> {
+                        Text(
+                            "No data coming soon movies",
+                            color = AppTheme.colors.whiteColor
+                        )
+                    }
                 }
             }
         }

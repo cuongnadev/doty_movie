@@ -17,6 +17,6 @@ object SeatData {
         listOf(Seat("E1", null, null), Seat("E2", null, null), Seat("E3", null, null), Seat("E4", null, null), Seat("E5", null, null),  Seat("E6", null, null), Seat("E7", null, null), Seat("E8", null, null), Seat("E9", null, null), null, Seat("E10", null, null), Seat("E11", null, null)),
         listOf(Seat("F1", null, null), Seat("F2", null, null), Seat("F3", null, null), Seat("F4", null, null), Seat("F5", null, null),  Seat("F6", null, null), Seat("F7", null, null), Seat("F8", null, null), Seat("F9", null, null), null, Seat("F10", null, null), Seat("F11", null, null)),
         listOf(Seat("G1", null, null), Seat("G2", null, null), Seat("G3", null, null), Seat("G4", null, null), Seat("G5", null, null),  Seat("G6", null, null), Seat("G7", null, null), Seat("G8", null, null), Seat("G9", null, null), null, Seat("G10", null, null), Seat("G11", null, null)),
-        listOf(Seat("H1", null, null), Seat("H2", null, null), Seat("H3", null, null), Seat("H4", null, null), Seat("H5", null, null),  Seat("H6", null, null), Seat("H7", null, null), Seat("H8", null, null), Seat("H9", null, null), null, Seat("H10", null, null), Seat("G11", null, null)),
+        listOf(Seat("H1", null, null), Seat("H2", null, null), Seat("H3", null, null), Seat("H4", null, null), Seat("H5", null, null),  Seat("H6", null, null), Seat("H7", null, null), Seat("H8", null, null), Seat("H9", null, null), null, Seat("H10", null, null), Seat("H11", null, null)),
     )
 }

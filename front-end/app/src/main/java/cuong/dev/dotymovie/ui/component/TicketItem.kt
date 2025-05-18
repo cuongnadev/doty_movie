@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +24,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cuong.dev.dotymovie.constants.TicketStatus
 import cuong.dev.dotymovie.ui.theme.AppTheme
 import cuong.dev.dotymovie.utils.formatTimeTicket
 import cuong.dev.dotymovie.viewmodel.TicketCount
@@ -38,15 +38,14 @@ fun TicketItem(
     startTime: String,
     endTime: String,
     amount: Int,
-    isPaid: Boolean = false
+    status: TicketStatus = TicketStatus.PENDING
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Max)
-            .padding(bottom = 20.dp)
             .then(
-                if(!isPaid) Modifier
+                if(status !== TicketStatus.PAID) Modifier
                     .background(
                         AppTheme.colors.deepBlack.copy(0.8f),
                         shape = RoundedCornerShape(14.dp)
@@ -68,7 +67,7 @@ fun TicketItem(
                 .weight(2f)
                 .fillMaxHeight()
                 .then(
-                    if(isPaid) Modifier
+                    if(status === TicketStatus.PAID) Modifier
                         .background(
                             AppTheme.colors.deepBlack.copy(0.8f)
                         )
@@ -130,21 +129,17 @@ fun TicketItem(
                     label = "Movie Theater",
                     value = theater
                 )
-                LabelText(
-                    label = "Buffer Products",
-                    value = "None"
-                )
             }
         }
 
-        if(isPaid) Spacer(Modifier.width(10.dp))
+        if(status === TicketStatus.PAID) Spacer(Modifier.width(10.dp))
 
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
                 .then(
-                    if (isPaid) Modifier
+                    if (status === TicketStatus.PAID) Modifier
                         .background(
                             AppTheme.colors.deepBlack.copy(0.8f)
                         )

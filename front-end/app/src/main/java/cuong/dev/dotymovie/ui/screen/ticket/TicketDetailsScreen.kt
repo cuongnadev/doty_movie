@@ -1,13 +1,12 @@
 package cuong.dev.dotymovie.ui.screen.ticket
 
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,17 +18,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import cuong.dev.dotymovie.R
 import cuong.dev.dotymovie.constants.SeatStatus
+import cuong.dev.dotymovie.constants.TicketStatus
 import cuong.dev.dotymovie.constants.TypeStep
 import cuong.dev.dotymovie.ui.component.ButtonType
 import cuong.dev.dotymovie.ui.component.CustomButton
@@ -62,9 +65,8 @@ fun TicketDetails(
 ) {
     val selectedSeats by ticketViewModel.seatNumbers.collectAsState(initial = emptyList())
     val seatsReserved by seatViewModel.seats.collectAsState(initial = emptyList())
-    val ticketCounts by ticketViewModel.ticketCounts.collectAsState()
     val reservedSeatNumbers = seatsReserved.map { it.seatNumber }
-    val limitSeats = selectedSeats.size
+    val ticketCounts by ticketViewModel.ticketCounts.collectAsState()
 
     LaunchedEffect(Unit) {
         seatViewModel.fetchSeatsByShowtime(showtimeViewModel.showtime.value!!.id)
@@ -109,7 +111,6 @@ fun TicketDetails(
 
                 TicketDetailsContent(
                     ticketCounts,
-                    limitSeats,
                     selectedSeats,
                     movieViewModel,
                     theaterViewModel,
@@ -120,6 +121,7 @@ fun TicketDetails(
         }
     }
 
+    var isButtonClicked by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -134,7 +136,12 @@ fun TicketDetails(
             CustomButton(
                 text = "Payment",
                 type = ButtonType.FILLED,
-                onClick = { navController.navigate("payment") },
+                onClick = {
+                    if (!isButtonClicked) {
+                        isButtonClicked = true
+                        navController.navigate("payment")
+                    }
+                },
                 isTextCentered = true,
                 iconPainter = painterResource(R.drawable.arrow),
                 textColor = AppTheme.colors.whiteColor,
@@ -142,9 +149,7 @@ fun TicketDetails(
                     .fillMaxWidth()
                     .padding(20.dp),
                 iconSize = 14.dp,
-                disable = selectedSeats.isEmpty()
-                        || (ticketCounts.adult + ticketCounts.child < limitSeats)
-
+                disable = selectedSeats.size != ticketViewModel.limitSeats.value || isButtonClicked
             )
         }
     }
@@ -201,6 +206,8 @@ private fun SeatGrid(
     selectedSeats: List<String>,
     ticketViewModel: TicketViewModel
 ) {
+    val context = LocalContext.current
+
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -228,7 +235,14 @@ private fun SeatGrid(
                                     shape = RoundedCornerShape(6.dp)
                                 )
                                 .clickable(enabled = (seat.status != SeatStatus.BOOKED.name)) {
-                                    ticketViewModel.updateSeats(seat.seatNumber)
+                                    val success = ticketViewModel.updateSeats(seat.seatNumber)
+                                    if (!success) {
+                                        Toast.makeText(
+                                            context,
+                                            "Bạn chỉ có thể chọn tối đa ${ticketViewModel.limitSeats.value} ghế.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
                         )
                     } else {
@@ -247,7 +261,6 @@ private fun SeatGrid(
 @Composable
 private fun TicketDetailsContent(
     ticketCounts: TicketCount,
-    limitSeats: Int,
     selectedSeats: List<String>,
     movieViewModel: MovieViewModel,
     theaterViewModel: TheaterViewModel,
@@ -279,139 +292,6 @@ private fun TicketDetailsContent(
             )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    AppTheme.colors.deepBlack.copy(0.8f),
-                    shape = RoundedCornerShape(14.dp)
-                )
-                .border(
-                    2.dp,
-                    AppTheme.colors.deepBlack,
-                    shape = RoundedCornerShape(14.dp)
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth(0.44f)
-                    .padding(8.dp)
-            ) {
-                CustomButton(
-                    onClick = {
-                        ticketViewModel.updateAdult(ticketCounts.adult + 1)
-                    },
-                    contentPadding = PaddingValues(0.dp),
-                    type = ButtonType.ICON,
-                    iconPainter = painterResource(R.drawable.plus),
-                    textColor = AppTheme.colors.whiteColor,
-                    disable = ticketCounts.adult + ticketCounts.child >= limitSeats
-                )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = ticketCounts.adult.toString(),
-                        color = if(ticketCounts.child >= limitSeats) AppTheme.colors.whiteColor.copy(0.4f)
-                                else AppTheme.colors.whiteColor,
-                        style = AppTheme.typography.bodyMedium.copy(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.W600
-                        )
-                    )
-
-                    Text(
-                        "ADULT",
-                        color = if(ticketCounts.child >= limitSeats) AppTheme.colors.whiteColor.copy(0.4f)
-                                else AppTheme.colors.whiteColor,
-                        style = AppTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.W500
-                        )
-                    )
-                }
-
-                CustomButton(
-                    onClick = {
-                        ticketViewModel.updateAdult(ticketCounts.adult - 1)
-                    },
-                    contentPadding = PaddingValues(0.dp),
-                    type = ButtonType.ICON,
-                    iconPainter = painterResource(R.drawable.subtract),
-                    textColor = AppTheme.colors.whiteColor,
-                    disable = ticketCounts.adult == 0
-                )
-            }
-
-            HorizontalDivider(
-                modifier = Modifier
-                    .width(2.dp)
-                    .height(60.dp)
-                    .background(AppTheme.colors.whiteColor.copy(0.6f)),
-                thickness = 2.dp
-            )
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth(0.84f)
-                    .padding(8.dp)
-            ) {
-                CustomButton(
-                    onClick = {
-                        ticketViewModel.updateChild(ticketCounts.child + 1)
-                    },
-                    contentPadding = PaddingValues(0.dp),
-                    type = ButtonType.ICON,
-                    iconPainter = painterResource(R.drawable.plus),
-                    textColor = AppTheme.colors.whiteColor,
-                    disable = ticketCounts.adult + ticketCounts.child >= limitSeats
-                )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-
-                ) {
-                    Text(
-                        text = ticketCounts.child.toString(),
-                        color = if(ticketCounts.adult >= limitSeats) AppTheme.colors.whiteColor.copy(0.4f)
-                                else AppTheme.colors.whiteColor,
-                        style = AppTheme.typography.bodyMedium.copy(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.W600
-                        )
-                    )
-
-                    Text(
-                        "CHILD",
-                        color = if(ticketCounts.adult >= limitSeats) AppTheme.colors.whiteColor.copy(0.4f)
-                                else AppTheme.colors.whiteColor,
-                        style = AppTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.W500
-                        )
-                    )
-                }
-
-                CustomButton(
-                    onClick = {
-                        ticketViewModel.updateChild(ticketCounts.child - 1)
-                    },
-                    contentPadding = PaddingValues(0.dp),
-                    type = ButtonType.ICON,
-                    iconPainter = painterResource(R.drawable.subtract),
-                    textColor = AppTheme.colors.whiteColor,
-                    disable = ticketCounts.child == 0
-                )
-            }
-        }
-
         TicketItem(
             ticketCounts,
             selectedSeats,
@@ -419,7 +299,17 @@ private fun TicketDetailsContent(
             theater = theaterViewModel.theater.value?.name ?: "None",
             startTime = showtimeViewModel.showtime.value?.startTime ?: "",
             endTime = showtimeViewModel.showtime.value?.endTime ?: "",
-            amount = ticketViewModel.totalAmount.value,
+            amount = ticketViewModel.totalAmount.value
+        )
+
+        Text(
+            text = "Note:\n" +
+                    "- The first two rows are VIP seats priced at $20 each.\n" +
+                    "- The remaining seats are standard and cost $15 each.\n" +
+                    "- Please choose your seats according to your needs and budget.",
+            color = AppTheme.colors.orangeColor,
+            style = AppTheme.typography.titleSmall,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
