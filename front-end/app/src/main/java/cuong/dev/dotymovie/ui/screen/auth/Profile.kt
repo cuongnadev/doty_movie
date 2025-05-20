@@ -40,19 +40,22 @@ fun Profile(
     authViewModel: AuthViewModel,
     userViewModel: UserViewModel
 ) {
-    var name by remember { mutableStateOf(userViewModel.name.value) }
-    var email by remember { mutableStateOf(userViewModel.email.value) }
+
     var showPasswordDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
+    val userId = remember {
         val token = authViewModel.getToken()
         val payload = token?.let { decodeJWT(it) }
-        val userId = payload?.optString("sub")?.toIntOrNull()
+        payload?.optString("sub")?.toIntOrNull()
+    }
 
+    LaunchedEffect(Unit) {
         if (userId == null) {
             Log.e("JWT", "Token invalid or missing user ID")
             return@LaunchedEffect
         }
+
+        userViewModel.loadUser(userId)
     }
 
     HomeLayout(navController, viewModel, authViewModel) {
@@ -74,16 +77,16 @@ fun Profile(
             Spacer(modifier = Modifier.height(24.dp))
 
             CustomTextField(
-                value = name,
-                onValueChange = { name = it },
+                value = userViewModel.name.value,
+                onValueChange = { userViewModel.onNameChange(it) },
                 label = "Username",
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             CustomTextField(
-                value = email,
-                onValueChange = { email = it },
+                value = userViewModel.email.value,
+                onValueChange = { userViewModel.onEmailChange(it) },
                 label = "E-mail",
             )
 
@@ -91,9 +94,9 @@ fun Profile(
 
             CustomButton(
                 onClick = {
-                    authViewModel.name.value = name
-                    authViewModel.email.value = email
-                    // TODO: Gọi API để lưu thông tin
+                    userId?.let {
+                        userViewModel.updateUser(it)
+                    }
                 },
                 text = "Save"
             )
@@ -106,23 +109,22 @@ fun Profile(
             )
 
             if (showPasswordDialog) {
-                ChangePasswordDialog(onDismiss = { showPasswordDialog = false })
+                userId?.let {
+                    ChangePasswordDialog(userViewModel, onDismiss = { showPasswordDialog = false }, it)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ChangePasswordDialog(onDismiss: () -> Unit) {
-    var oldPassword by remember { mutableStateOf("") }
-    var newPassword by remember { mutableStateOf("") }
-
+private fun ChangePasswordDialog(userViewModel: UserViewModel, onDismiss: () -> Unit, userId: Int) {
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             CustomButton(
                 onClick = {
-                    // TODO: xử lý đổi mật khẩu
+                    userViewModel.changePassword(userId)
                     onDismiss()
                 },
                 text = "Confirm"
@@ -138,14 +140,14 @@ private fun ChangePasswordDialog(onDismiss: () -> Unit) {
         text = {
             Column {
                 CustomTextField(
-                    value = oldPassword,
-                    onValueChange = { oldPassword = it },
+                    value = userViewModel.oldPassword.value,
+                    onValueChange = { userViewModel.onOldPasswordChange(it) },
                     label = "Old-Password",
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 CustomTextField(
-                    value = newPassword,
-                    onValueChange = { newPassword = it },
+                    value = userViewModel.newPassword.value,
+                    onValueChange = { userViewModel.onNewPasswordChange(it) },
                     label = "New-Password",
                 )
             }

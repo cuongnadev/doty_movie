@@ -32,7 +32,7 @@ class UserViewModel @Inject constructor(
     private val _successMessage = mutableStateOf<String?>(null)
     val successMessage: State<String?> = _successMessage
 
-    suspend fun loadUser(userId: Int) {
+    fun loadUser(userId: Int) {
         viewModelScope.launch {
             try {
                 val response = userRepository.getCurrentUser(userId)
@@ -40,6 +40,7 @@ class UserViewModel @Inject constructor(
                     response.body()?.let {
                         _name.value = it.name
                         _email.value = it.email
+                        Log.i("UserViewModel", "name: ${name.value}, email: ${email.value}")
                     }
                 } else {
                     _errorMessage.value = "Error when fetch data user {$userId} ${response.code()}"
@@ -96,4 +97,19 @@ class UserViewModel @Inject constructor(
         }
     }
 
+    fun onNameChange(value: String) {
+        _name.value = value
+    }
+
+    fun onEmailChange(value: String) {
+        _email.value = value
+    }
+
+    fun onOldPasswordChange(value: String) {
+        _oldPassword.value = value
+    }
+
+    fun onNewPasswordChange(value: String) {
+        _newPassword.value = value
+    }
 }
