@@ -7,6 +7,7 @@ import cuong.dev.dotymovie.data.remote.SeatApi
 import cuong.dev.dotymovie.data.remote.ShowtimeApi
 import cuong.dev.dotymovie.data.remote.TheaterApi
 import cuong.dev.dotymovie.data.remote.TicketApi
+import cuong.dev.dotymovie.data.remote.UserApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -69,5 +70,11 @@ object AppModule {
     @Singleton
     fun provideMovieFavorite(retrofit: Retrofit): MovieFavoriteApi {
         return retrofit.create(MovieFavoriteApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUser(retrofit: Retrofit): UserApi {
+        return retrofit.create(UserApi::class.java)
     }
 }

@@ -131,7 +131,7 @@ fun HomeLayout(
         }
 
         if (show.value) {
-            Box(
+            Column (
                 modifier = Modifier
                     .offset(x = 24.dp, y = 92.dp)
                     .width(120.dp)
@@ -139,6 +139,18 @@ fun HomeLayout(
                     .background(AppTheme.colors.deepBlack.copy(0.8f))
                     .border(1.dp, AppTheme.colors.whiteColor.copy(0.6f), shape = RoundedCornerShape(8.dp))
             ) {
+                Text(
+                    text = "Profile",
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .clickable {
+                            navController.navigate("profile")
+                        },
+                    color = AppTheme.colors.whiteColor,
+                    style = AppTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.W600,
+                    )
+                )
                 Text(
                     text = "Logout",
                     modifier = Modifier

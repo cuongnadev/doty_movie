@@ -38,24 +38,37 @@ fun TicketItem(
     startTime: String,
     endTime: String,
     amount: Int,
-    status: TicketStatus = TicketStatus.PENDING
+    status: String = "pendding"
 ) {
+    val statusMapping = when(status.lowercase()) {
+        "paid" -> TicketStatus.PAID
+        "confirmed" -> TicketStatus.CONFIRMED
+        "cancelled" -> TicketStatus.CANCELLED
+        else -> TicketStatus.PENDING
+    }
+    val borderColor = when (statusMapping) {
+        TicketStatus.PAID -> AppTheme.colors.greenColor
+        TicketStatus.CONFIRMED -> AppTheme.colors.yellowColor
+        TicketStatus.CANCELLED -> AppTheme.colors.redColor
+        TicketStatus.PENDING -> AppTheme.colors.semiTransparentWhite
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Max)
             .then(
-                if(status !== TicketStatus.PAID) Modifier
+                if(statusMapping !== TicketStatus.PAID) Modifier
                     .background(
                         AppTheme.colors.deepBlack.copy(0.8f),
                         shape = RoundedCornerShape(14.dp)
                     )
-                    .border(
-                        2.dp,
-                        AppTheme.colors.deepBlack,
-                        shape = RoundedCornerShape(14.dp)
-                    )
                 else Modifier.clip(shape = RoundedCornerShape(14.dp))
+            )
+            .border(
+                2.dp,
+                borderColor,
+                shape = RoundedCornerShape(14.dp)
             ),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -67,7 +80,7 @@ fun TicketItem(
                 .weight(2f)
                 .fillMaxHeight()
                 .then(
-                    if(status === TicketStatus.PAID) Modifier
+                    if(statusMapping === TicketStatus.PAID) Modifier
                         .background(
                             AppTheme.colors.deepBlack.copy(0.8f)
                         )
@@ -83,7 +96,7 @@ fun TicketItem(
                     val dashHeight = 6.dp.toPx()
                     val dashGap = 4.dp.toPx()
                     var y = 0f
-                    while (y < size.height) {
+                    while (y < (size.height - dashHeight)) {
                         drawLine(
                             color = colorSeparator,
                             start = Offset(x = size.width, y = y),
@@ -132,14 +145,14 @@ fun TicketItem(
             }
         }
 
-        if(status === TicketStatus.PAID) Spacer(Modifier.width(10.dp))
+        if(statusMapping === TicketStatus.PAID) Spacer(Modifier.width(10.dp))
 
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
                 .then(
-                    if (status === TicketStatus.PAID) Modifier
+                    if (statusMapping === TicketStatus.PAID) Modifier
                         .background(
                             AppTheme.colors.deepBlack.copy(0.8f)
                         )
@@ -155,7 +168,7 @@ fun TicketItem(
                     val dashHeight = 6.dp.toPx()
                     val dashGap = 4.dp.toPx()
                     var y = 0f
-                    while (y < size.height) {
+                    while (y < (size.height - dashHeight)) {
                         drawLine(
                             color = colorSeparator,
                             start = Offset(x = 0f, y = y),

@@ -1,6 +1,5 @@
 package cuong.dev.dotymovie.model.ticket
 
-import cuong.dev.dotymovie.constants.TicketStatus
 import cuong.dev.dotymovie.viewmodel.TicketCount
 
 data class TicketResponse (
@@ -13,5 +12,5 @@ data class TicketResponse (
     val endTime: String,
     val amount: Int,
     val isUsed: Boolean,
-    val status: TicketStatus
+    val status: String
 )

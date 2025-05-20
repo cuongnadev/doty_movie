@@ -45,7 +45,7 @@ fun TicketsScreen(
     HomeLayout(navController, viewModel) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp),
+                .padding(start = 16.dp, end = 16.dp, bottom = 100.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (tickets.value.isEmpty()) {
@@ -55,7 +55,6 @@ fun TicketsScreen(
                 )
             } else {
                 tickets.value.forEach { ticket ->
-                    Log.i("Status", ticket.status.value)
                     TicketItem(
                         ticketCounts = ticket.ticketCount,
                         selectedSeats = ticket.selectedSeats,

@@ -12,6 +12,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import cuong.dev.dotymovie.ui.screen.*
 import cuong.dev.dotymovie.ui.screen.auth.AuthenticationScreen
+import cuong.dev.dotymovie.ui.screen.auth.Profile
 import cuong.dev.dotymovie.ui.screen.auth.SignInScreen
 import cuong.dev.dotymovie.ui.screen.auth.SignUpScreen
 import cuong.dev.dotymovie.ui.screen.auth.VerificationEmailScreen
@@ -31,12 +32,14 @@ import cuong.dev.dotymovie.viewmodel.SeatViewModel
 import cuong.dev.dotymovie.viewmodel.ShowtimeViewModel
 import cuong.dev.dotymovie.viewmodel.TheaterViewModel
 import cuong.dev.dotymovie.viewmodel.TicketViewModel
+import cuong.dev.dotymovie.viewmodel.UserViewModel
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val viewModel: NavigationViewModel = viewModel()
     val authViewModel: AuthViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltViewModel()
     val movieViewModel: MovieViewModel = hiltViewModel()
     val theaterViewModel: TheaterViewModel = hiltViewModel()
     val showtimeViewModel: ShowtimeViewModel = hiltViewModel()
@@ -174,6 +177,12 @@ fun AppNavigation() {
             route = "my-ticket"
         ) {
             MyTicketScreen(navController)
+        }
+
+        composable(
+            route = "profile"
+        ) {
+            Profile(navController, viewModel, authViewModel, userViewModel)
         }
     }
 }

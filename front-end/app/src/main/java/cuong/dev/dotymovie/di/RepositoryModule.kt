@@ -7,6 +7,7 @@ import cuong.dev.dotymovie.data.remote.SeatApi
 import cuong.dev.dotymovie.data.remote.ShowtimeApi
 import cuong.dev.dotymovie.data.remote.TheaterApi
 import cuong.dev.dotymovie.data.remote.TicketApi
+import cuong.dev.dotymovie.data.remote.UserApi
 import cuong.dev.dotymovie.repository.AuthRepository
 import cuong.dev.dotymovie.repository.MovieFavoriteRepository
 import cuong.dev.dotymovie.repository.MovieRepository
@@ -14,6 +15,7 @@ import cuong.dev.dotymovie.repository.SeatRepository
 import cuong.dev.dotymovie.repository.ShowtimeRepository
 import cuong.dev.dotymovie.repository.TheaterRepository
 import cuong.dev.dotymovie.repository.TicketRepository
+import cuong.dev.dotymovie.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -64,5 +66,11 @@ object RepositoryModule {
     @Singleton
     fun provideMovieFavoriteRepository(movieFavoriteApi: MovieFavoriteApi): MovieFavoriteRepository {
         return MovieFavoriteRepository(movieFavoriteApi)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(userApi: UserApi): UserRepository {
+        return UserRepository(userApi)
     }
 }

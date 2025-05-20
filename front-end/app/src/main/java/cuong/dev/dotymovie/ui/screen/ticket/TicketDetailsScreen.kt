@@ -243,8 +243,15 @@ private fun SeatGrid(
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
-                                }
-                        )
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = seat.seatNumber,
+                                style = AppTheme.typography.bodySmall,
+                                color = AppTheme.colors.whiteColor
+                            )
+                        }
                     } else {
                         Spacer(
                             Modifier
@@ -304,7 +311,7 @@ private fun TicketDetailsContent(
 
         Text(
             text = "Note:\n" +
-                    "- The first two rows are VIP seats priced at $20 each.\n" +
+                    "- The first two rows (A, B) are VIP seats priced at $20 each.\n" +
                     "- The remaining seats are standard and cost $15 each.\n" +
                     "- Please choose your seats according to your needs and budget.",
             color = AppTheme.colors.orangeColor,

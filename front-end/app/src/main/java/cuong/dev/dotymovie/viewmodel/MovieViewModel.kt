@@ -13,6 +13,7 @@ import cuong.dev.dotymovie.model.movie.UpdateMovieDTO
 import cuong.dev.dotymovie.repository.MovieFavoriteRepository
 import cuong.dev.dotymovie.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -198,6 +199,8 @@ class MovieViewModel @Inject constructor(
         _isLoading.value = true
         _movies.emit(emptyList())
 
+        delay(1500L)
+
         try {
             val response = movieRepository.searchMovies(query)
 
@@ -212,4 +215,8 @@ class MovieViewModel @Inject constructor(
             _isLoading.value = false
         }
     }
+
+     fun clearMovies() {
+        _movies.value = emptyList()
+     }
 }

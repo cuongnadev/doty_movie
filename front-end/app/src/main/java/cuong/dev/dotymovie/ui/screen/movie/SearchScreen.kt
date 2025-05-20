@@ -23,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -52,10 +53,22 @@ fun SearchScreen(
     var searchQuery by remember { mutableStateOf("") }
     val searchResults by movieViewModel.movies.collectAsState(initial = emptyList())
     val isLoading by movieViewModel.isLoading.collectAsState()
+    val showNoResult by produceState(initialValue = false, searchQuery, searchResults, isLoading) {
+        if (searchQuery.isNotBlank() && searchResults.isEmpty() && !isLoading) {
+            delay(1000L)
+            value = true
+        } else {
+            value = false
+        }
+    }
+
+    LaunchedEffect(searchQuery) {
+        movieViewModel.clearMovies()
+    }
 
     LaunchedEffect(Unit) {
         snapshotFlow { searchQuery }
-            .debounce(2000L)
+            .debounce(1000L)
             .filter { it.isNotBlank() }
             .distinctUntilChanged()
             .collect{ query ->
@@ -153,12 +166,14 @@ fun SearchScreen(
                     }
 
                     else -> {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            Text(
-                                "No movies found!",
-                                style = AppTheme.typography.titleSmall,
-                                color = AppTheme.colors.orangeColor
-                            )
+                        if (showNoResult) {
+                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                Text(
+                                    "No movies found!",
+                                    style = AppTheme.typography.titleSmall,
+                                    color = AppTheme.colors.orangeColor
+                                )
+                            }
                         }
                     }
                 }
