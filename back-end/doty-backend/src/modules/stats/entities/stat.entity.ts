@@ -1,12 +1,12 @@
 import { Type } from "class-transformer";
-import { IsArray, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsInt, IsString, ValidateNested } from "class-validator";
 
 class Revenue {
     @IsString()
     month: string;
 
-    @IsString()
-    value: string;
+    @IsInt()
+    value: number;
 }
 
 export class Stats {
@@ -16,11 +16,11 @@ export class Stats {
     revenueData: Revenue[];
 
     @IsString()
-    totalMovies: string;
+    totalMovies: number;
 
     @IsString()
-    totalTicketsSold: string;
+    totalTicketsSold: number;
 
     @IsString()
-    totalRevenue: string;
+    totalRevenue: number;
 }

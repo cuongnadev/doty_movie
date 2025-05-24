@@ -22,11 +22,11 @@ export class StatsService {
     return {
       revenueData: monthlyRevenue.map((item) => ({
         month: item.month,
-        value: item.revenue.toString(),
+        value: item.revenue,
       })),
-      totalMovies: totalMovies.toString(),
-      totalTicketsSold: ticketStats.totalTicketsSold.toString(),
-      totalRevenue: ticketStats.totalRevenue.toString(),
+      totalMovies: totalMovies,
+      totalTicketsSold: ticketStats.totalTicketsSold,
+      totalRevenue: ticketStats.totalRevenue,
     };
   }
 }

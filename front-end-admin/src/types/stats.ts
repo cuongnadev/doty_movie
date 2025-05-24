@@ -1,9 +1,9 @@
 export interface Stats {
     revenueData: {
         month: string,
-        value: string
+        value: number
     }[],
-    totalMovies: string,
-    totalTicketsSold: string,
-    totalRevenue: string
+    totalMovies: number,
+    totalTicketsSold: number,
+    totalRevenue: number
 }
