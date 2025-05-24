@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import cuong.dev.dotymovie.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import javax.inject.Inject
 
 @HiltViewModel
@@ -67,7 +68,14 @@ class UserViewModel @Inject constructor(
                         _email.value = it.email
                     }
                 } else {
-                    _errorMessage.value = "Failed to update user ($userId): ${response.code()}"
+                    val errorBody = response.errorBody()?.string()
+                    val errorMessage = try {
+                        val json = JSONObject(errorBody ?: "")
+                        json.getString("message")
+                    } catch (e: Exception) {
+                        errorBody ?: response.message()
+                    }
+                    _errorMessage.value = "Failed to update user ($userId): $errorMessage}"
                     Log.e("UserViewModel", "Failed to update user $userId - Code: ${response.code()}")
                 }
             } catch (e: Exception) {
@@ -87,7 +95,14 @@ class UserViewModel @Inject constructor(
                 if (response.isSuccessful) {
                     _successMessage.value = "Password changed successfully"
                 } else {
-                    _errorMessage.value = "Failed to change password ($userId): ${response.code()}"
+                    val errorBody = response.errorBody()?.string()
+                    val errorMessage = try {
+                        val json = JSONObject(errorBody ?: "")
+                        json.getString("message")
+                    } catch (e: Exception) {
+                        errorBody ?: response.message()
+                    }
+                    _errorMessage.value = "Failed to change password by user ($userId): $errorMessage"
                     Log.e("UserViewModel", "Failed to change password for user $userId - Code: ${response.code()}")
                 }
             } catch (e: Exception) {
@@ -111,5 +126,10 @@ class UserViewModel @Inject constructor(
 
     fun onNewPasswordChange(value: String) {
         _newPassword.value = value
+    }
+
+    fun clearMessages() {
+        _successMessage.value = null
+        _errorMessage.value = null
     }
 }
