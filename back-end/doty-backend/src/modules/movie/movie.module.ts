@@ -9,6 +9,6 @@ import { MovieFavoriteModule } from '../movie-favorite/movie-favorite.module';
   imports: [TypeOrmModule.forFeature([Movie]), MovieFavoriteModule],
   controllers: [MovieController],
   providers: [MovieService],
-  exports: [TypeOrmModule]
+  exports: [TypeOrmModule, MovieService]
 })
 export class MovieModule {}
