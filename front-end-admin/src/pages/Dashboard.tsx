@@ -27,6 +27,8 @@ const Dashboard = () => {
         return <div className="p-6 text-center text-[#6C47DB] text-center">Đang tải dữ liệu...</div>;
     }
 
+    console.log(data);
+
     const { revenueData, overviewData } = data;
     return (
         <div className="p-6 space-y-8">

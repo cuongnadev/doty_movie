@@ -30,7 +30,7 @@ export class TicketService {
 
     return {
       totalTicketsSold: parseInt(result.totalTicketsSold) || 0,
-      totalRevenue: parseFloat(result.totalRevenue) || 0,
+      totalRevenue: parseFloat(result.totalRevenue) * 25000 || 0,
     };
   }
 
@@ -46,7 +46,7 @@ export class TicketService {
 
     return result.map((item) => ({
       month: item.month,
-      revenue: parseFloat(item.revenue) || 0,
+      revenue: parseFloat(item.revenue) * 25000 || 0,
     }));
   }
 
