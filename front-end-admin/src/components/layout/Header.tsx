@@ -10,7 +10,7 @@ export const Header = () => {
                     <li>
                         <Link
                             to="/"
-                            className="p-[8px] border border-[#6C47DB] rounded-[8px] hover:bg-[rgba(108,71,219,0.5)]"
+                            className="p-[8px] border border-[#6C47DB] rounded-[8px] hover:bg-[#6C47DB]"
                         >
                             Dashboard
                         </Link>
@@ -18,7 +18,7 @@ export const Header = () => {
                     <li>
                         <Link
                             to="/movies"
-                            className="p-[8px] border border-[#6C47DB] rounded-[8px] hover:bg-[rgba(108,71,219,0.5)]"
+                            className="p-[8px] border border-[#6C47DB] rounded-[8px] hover:bg-[#6C47DB]"
                         >
                             Movie
                         </Link>
@@ -26,7 +26,7 @@ export const Header = () => {
                     <li>
                         <Link
                             to="/tickets"
-                            className="p-[8px] border border-[#6C47DB] rounded-[8px] hover:bg-[rgba(108,71,219,0.5)]"
+                            className="p-[8px] border border-[#6C47DB] rounded-[8px] hover:bg-[#6C47DB]"
                         >
                             Ticket
                         </Link>
@@ -34,7 +34,7 @@ export const Header = () => {
                     <li>
                         <Link
                             to="/settings"
-                            className="p-[8px] border border-[#6C47DB] rounded-[8px] hover:bg-[rgba(108,71,219,0.5)]"
+                            className="p-[8px] border border-[#6C47DB] rounded-[8px] hover:bg-[#6C47DB]"
                         >
                             Setting
                         </Link>

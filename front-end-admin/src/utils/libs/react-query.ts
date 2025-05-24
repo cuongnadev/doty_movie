@@ -6,6 +6,10 @@ export const queryClient = new QueryClient({
             staleTime: 1000 * 60 * 5,
             retry: 2,
             refetchOnWindowFocus: true,
-        }
+            gcTime: 1000 * 60 * 10
+        },
+        mutations: {
+            retry: 1, // Retry 1 lần cho mutation
+        },
     }
 })

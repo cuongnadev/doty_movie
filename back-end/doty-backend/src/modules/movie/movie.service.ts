@@ -12,6 +12,10 @@ export class MovieService {
     @InjectRepository(Movie) private movieRepo: Repository<Movie>,
     @InjectRepository(MovieFavorite) private movieFavoriteRepo: Repository<MovieFavorite>
   ) {}
+  async count(): Promise<number> {
+    return this.movieRepo.count();
+  }
+  
   async create(createMovieDto: CreateMovieDto) {
     const existing = await this.movieRepo.findOne({
       where: { title: ILike(createMovieDto.title) }

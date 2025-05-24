@@ -16,6 +16,7 @@ import databaseConfig from './config/database.config';
 import { MailerModule } from "@nestjs-modules/mailer"
 import { TicketModule } from './modules/ticket/ticket.module';
 import { MovieFavoriteModule } from './modules/movie-favorite/movie-favorite.module';
+import { StatsModule } from './modules/stats/stats.module';
 configDotenv()
 
 console.log(process.env.NODE_ENV);
@@ -71,7 +72,7 @@ console.log(process.env.NODE_ENV);
         }
       }
     }),
-    MovieModule, MediaModule, TheaterModule, ShowtimeModule, SeatModule, PaymentModule, UserModule, AuthModule, TicketModule, MovieFavoriteModule
+    MovieModule, MediaModule, TheaterModule, ShowtimeModule, SeatModule, PaymentModule, UserModule, AuthModule, TicketModule, MovieFavoriteModule, StatsModule
   ],
   controllers: [AppController],
   providers: [AppService],

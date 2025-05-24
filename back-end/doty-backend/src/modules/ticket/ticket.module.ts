@@ -14,5 +14,6 @@ import { ShowtimeModule } from '../showtime/showtime.module';
   ],
   controllers: [TicketController],
   providers: [TicketService],
+  exports: [TypeOrmModule]
 })
 export class TicketModule {}

@@ -20,6 +20,35 @@ export class TicketService {
     @InjectRepository(Seat) private seatRepo: Repository<Seat>,
     @InjectRepository(Showtime) private showtimeRepo: Repository<Showtime>,
   ) {}
+  async getTicketStats(): Promise<{ totalTicketsSold: number; totalRevenue: number }> {
+    const result = await this.ticketRepo
+    .createQueryBuilder('ticket')
+    .where('ticket.status = :status', { status: TicketStatus.PAID })
+    .select('COUNT(*)', 'totalTicketsSold')
+    .addSelect('SUM(ticket.amount)', 'totalRevenue')
+    .getRawOne();
+
+    return {
+      totalTicketsSold: parseInt(result.totalTicketsSold) || 0,
+      totalRevenue: parseFloat(result.totalRevenue) || 0,
+    };
+  }
+
+  async getMonthlyRevenue(): Promise<{ month: string, revenue: number }[]> {
+    const result = await this.ticketRepo
+    .createQueryBuilder('ticket')
+    .where('ticket.status = :status', { status: TicketStatus.PAID })
+    .select("TO_CHAR(ticket.createdAt, 'Mon')", "month")
+    .addSelect("SUM(ticket.amount)", "revenue")
+    .groupBy("TO_CHAR(ticket.createdAt, 'Mon')")
+    .orderBy("MIN(ticket.createdAt)", 'ASC')
+    .getRawMany();
+
+    return result.map((item) => ({
+      month: item.month,
+      revenue: parseFloat(item.revenue) || 0,
+    }));
+  }
 
   async create(createTicketDto: CreateTicketDto) {
     const { userId, showtimeId, ticketCount, seatNumber, amount } =
